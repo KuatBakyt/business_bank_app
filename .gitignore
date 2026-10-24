@@ -12,3 +12,10 @@ htmlcov/
 backend/staticfiles/
 backend/private_files/
 *.log
+
+# Flutter
+frontend/.dart_tool/
+frontend/build/
+frontend/.flutter-plugins*
+frontend/coverage/
+frontend/test/failures/

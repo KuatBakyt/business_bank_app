@@ -2,7 +2,7 @@
 
 [![Backend checks](https://github.com/KuatBakyt/business_bank_app/actions/workflows/backend.yml/badge.svg)](https://github.com/KuatBakyt/business_bank_app/actions/workflows/backend.yml)
 
-Учебный банковский кабинет для ИП и малого бизнеса. Только тестовые средства и вымышленные данные. На этом этапе реализуется **backend**, фронтенда нет.
+Учебный банковский кабинет для ИП и малого бизнеса. Только тестовые средства и вымышленные данные. В репозитории находятся Django backend и подключённый Flutter Web интерфейс.
 
 Python 3.12 · Django REST Framework · PostgreSQL 16 · JWT · Celery · Redis · Docker.
 
@@ -16,6 +16,7 @@ Python 3.12 · Django REST Framework · PostgreSQL 16 · JWT · Celery · Redis 
 - Ограничительные триггеры БД: баланс проводок, сверка кеша, неизменяемость истории.
 - CSV/PDF выписки через Celery; закрытая выдача, срок хранения 24 часа.
 - Аудит, Swagger, seed_demo, reconcile, CI с настоящей PostgreSQL.
+- Адаптивный Flutter Web кабинет: счета, платежи, согласование, выписки, сотрудники и аудит.
 
 ## Запуск на Windows
 
@@ -45,6 +46,18 @@ docker compose up -d
 На Linux/macOS вместо Copy-Item используйте `cp .env.example .env`.
 
 Учебные пользователи: `owner@demo.example`, `accountant@demo.example`, `viewer@demo.example`, `partner@demo.example`. Пароль — ваш DEMO_PASSWORD. Повтор seed_demo не меняет пароли и не пополняет повторно. Счета: `DEMO-KUAT-001` и `DEMO-VECTOR-001`, начальное пополнение по 1 000 000 KZT.
+
+## Интерфейс Flutter
+
+После запуска backend:
+
+```powershell
+cd frontend
+flutter pub get
+flutter run -d chrome --web-port=8080 --dart-define=API_URL=http://localhost:8000/api/v1/
+```
+
+В backend `.env` должны быть разрешены CORS origins `http://localhost:8080,http://127.0.0.1:8080`. Для существующей `.env` добавьте их и пересоздайте контейнеры. Вход — email демо-пользователя и ваш DEMO_PASSWORD. [Полная инструкция Flutter](frontend/README.md).
 
 ## Первый перевод через Swagger
 
@@ -94,4 +107,4 @@ docker compose down
 - [Сценарий демонстрации](docs/demo.md)
 - [Измерения производительности](docs/performance.md)
 
-Это учебный backend, без реальных банковских подключений, KYC, эквайринга и фронтенда. HTTPS staging не развёрнут. Фактическую проверку смотрите в CI, показатели производительности ещё не измерены.
+Это учебный backend, без реальных банковских подключений, KYC и эквайринга. HTTPS staging не развёрнут. Фактическую проверку смотрите в CI, показатели производительности ещё не измерены.
