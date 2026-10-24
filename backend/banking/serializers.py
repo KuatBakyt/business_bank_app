@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from .models import Account, AuditEvent, Company, LedgerEntry, Membership, Payment, StatementExport
 
@@ -23,7 +24,10 @@ class RegisterSerializer(StrictSerializer):
         data["email"] = data["email"].strip().lower()
         if User.objects.filter(email__iexact=data["email"]).exists():
             raise serializers.ValidationError({"email": "Email уже зарегистрирован"})
-        validate_password(data["password"], User(email=data["email"], first_name=data["first_name"]))
+        try:
+            validate_password(data["password"], User(email=data["email"], first_name=data["first_name"]))
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({"password": exc.messages}) from exc
         return data
 
 

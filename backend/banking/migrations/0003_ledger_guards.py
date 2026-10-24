@@ -1,6 +1,7 @@
 from django.db import migrations
 
 SQL = r'''
+ALTER TABLE banking_journaltransaction ADD COLUMN origin_xid bigint NOT NULL DEFAULT txid_current();
 CREATE FUNCTION bank_immutable() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   RAISE EXCEPTION 'immutable financial or audit record' USING ERRCODE='23514';
@@ -13,10 +14,10 @@ CREATE TRIGGER immutable_audit BEFORE UPDATE OR DELETE ON banking_auditevent
 FOR EACH ROW EXECUTE FUNCTION bank_immutable();
 
 CREATE FUNCTION bank_entry_insert() RETURNS trigger LANGUAGE plpgsql AS $$
-DECLARE born text;
+DECLARE born bigint;
 BEGIN
-  SELECT xmin::text INTO born FROM banking_journaltransaction WHERE id=NEW.journal_id;
-  IF born IS DISTINCT FROM (pg_current_xact_id()::text) THEN
+  SELECT origin_xid INTO born FROM banking_journaltransaction WHERE id=NEW.journal_id;
+  IF born IS DISTINCT FROM txid_current() THEN
     RAISE EXCEPTION 'cannot append to committed journal' USING ERRCODE='23514';
   END IF;
   RETURN NEW;
@@ -114,6 +115,7 @@ DROP TRIGGER entries_same_transaction ON banking_ledgerentry;
 DROP TRIGGER immutable_journal ON banking_journaltransaction;
 DROP TRIGGER immutable_entry ON banking_ledgerentry;
 DROP TRIGGER immutable_audit ON banking_auditevent;
+ALTER TABLE banking_journaltransaction DROP COLUMN origin_xid;
 DROP FUNCTION bank_check_payment(),bank_guard_payment(),bank_check_balance(),bank_check_journal(),bank_entry_insert(),bank_immutable();
 '''
 class Migration(migrations.Migration):
