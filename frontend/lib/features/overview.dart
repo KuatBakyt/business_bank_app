@@ -20,14 +20,14 @@ class OverviewPage extends StatelessWidget {
                   label: const Text('Новый платёж'))
               : null),
       LayoutBuilder(builder: (_, c) {
-        final width = c.maxWidth < 600 ? c.maxWidth : (c.maxWidth - 32) / 3;
+        final width = c.maxWidth < 600 ? (c.maxWidth - 16) / 2 : (c.maxWidth - 32) / 3;
         return Wrap(spacing: 16, runSpacing: 16, children: [
           Metric(
               'Общий баланс',
               Money.format(Money.decimal(s.total)),
               Icons.account_balance_wallet_outlined,
               const Color(0xFFEAF7F7),
-              width),
+              c.maxWidth < 600 ? c.maxWidth : width),
           Metric('Счета', '${s.accounts.length}', Icons.description_outlined,
               const Color(0xFFEEF5FE), width),
           Metric(
@@ -65,6 +65,7 @@ class Metric extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
       width: width,
+      constraints: const BoxConstraints(minHeight: 150),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
           color: color,
@@ -208,18 +209,20 @@ class _AccountHistoryState extends State<AccountHistory> {
           .read<BankStore>()
           .api
           .all('accounts/${widget.account.id}/transactions/');
-      if (mounted)
+      if (mounted) {
         setState(() {
           rows = result;
           loading = false;
           error = null;
         });
+      }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() {
           error = '$e';
           loading = false;
         });
+      }
     }
   }
 

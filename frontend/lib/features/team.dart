@@ -116,8 +116,9 @@ class _TeamPageState extends State<TeamPage> {
                               onChanged: busy
                                   ? null
                                   : (v) {
-                                      if (v != null)
+                                      if (v != null) {
                                         change(member, {'role': v});
+                                      }
                                     }))
                     else
                       Text(roleLabels[member['role']] ?? '',
@@ -148,10 +149,11 @@ class _TeamPageState extends State<TeamPage> {
                                                     child: const Text(
                                                         'Подтвердить'))
                                               ]));
-                                  if (confirm == true && mounted)
+                                  if (confirm == true && mounted) {
                                     change(member, {
                                       'is_active': member['is_active'] != true
                                     });
+                                  }
                                 },
                           child: Text(member['is_active'] == true
                               ? 'Отключить'

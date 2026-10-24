@@ -237,12 +237,13 @@ class _PaymentFormState extends State<PaymentForm> {
               .api
               .request('POST', 'recipients/resolve/', body: {'number': lookup})
           as Json;
-      if (mounted && number.text.trim() == lookup)
+      if (mounted && number.text.trim() == lookup) {
         setState(() {
           destination = result['id'] as String;
           recipient = result['company_name'] as String;
           resolvedNumber = lookup;
         });
+      }
     } catch (e) {
       if (mounted) showError(context, e);
     } finally {
@@ -294,9 +295,10 @@ class _PaymentFormState extends State<PaymentForm> {
           method: savedId == null ? 'POST' : 'PATCH',
           label: 'Сохранение платежа');
       savedId = result['id'] as String;
-      if (submit)
+      if (submit) {
         await s.command('payments/$savedId/submit/', {},
             label: 'Отправка на согласование');
+      }
       if (mounted) {
         Navigator.pop(context);
         showSuccess(context,
@@ -405,8 +407,9 @@ class _PaymentFormState extends State<PaymentForm> {
                                 try {
                                   final value = Money.cents(v ?? '');
                                   if (value <= BigInt.zero ||
-                                      value > BigInt.from(10000000000))
+                                      value > BigInt.from(10000000000)) {
                                     return 'Сумма от 0,01 до 100 000 000 ₸';
+                                  }
                                 } on FormatException {
                                   return 'Введите сумму, не более двух знаков после запятой';
                                 }
@@ -531,7 +534,7 @@ class _PaymentDetailState extends State<PaymentDetail> {
                     const StatusPill('PENDING_APPROVAL'),
                     const Icon(Icons.arrow_right, color: muted),
                     StatusPill(
-                        p.status == 'DRAFT' || pending ? 'EXECUTED' : p.status)
+                        p.status == 'DRAFT' || pending ? 'NOT_EXECUTED' : p.status)
                   ]),
                   if (pending)
                     const Padding(

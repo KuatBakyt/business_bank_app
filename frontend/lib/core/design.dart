@@ -11,13 +11,15 @@ const line = Color(0xFFE4EBF3);
 ThemeData bankTheme() => ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: canvas,
-      fontFamily: 'Roboto',
+      fontFamily: 'BankSans',
       colorScheme: ColorScheme.fromSeed(
           seedColor: teal,
           primary: teal,
           secondary: navy,
           surface: Colors.white),
-      textTheme: const TextTheme(
+      dialogTheme: DialogThemeData(backgroundColor: Colors.white, surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+    textTheme: const TextTheme(
         headlineLarge: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.w800,
@@ -172,8 +174,9 @@ Future<String?> askText(BuildContext context, String title,
                     child: const Text('Отмена')),
                 FilledButton(
                     onPressed: () {
-                      if (controller.text.trim().isNotEmpty)
+                      if (controller.text.trim().isNotEmpty) {
                         Navigator.pop(context, controller.text.trim());
+                      }
                     },
                     child: const Text('Продолжить'))
               ]));

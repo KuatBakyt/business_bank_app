@@ -58,11 +58,12 @@ class _StatementsPageState extends State<StatementsPage>
           .read<BankStore>()
           .api
           .all('accounts/$selected/statement-exports/');
-      if (mounted && epoch == revision)
+      if (mounted && epoch == revision) {
         setState(() {
           exports = rows;
           error = null;
         });
+      }
     } catch (e) {
       if (mounted && epoch == revision) setState(() => error = '$e');
     } finally {
@@ -77,7 +78,7 @@ class _StatementsPageState extends State<StatementsPage>
         firstDate: DateTime(2020),
         lastDate: DateTime.now(),
         helpText: first ? 'Начало периода' : 'Конец периода');
-    if (date != null && mounted)
+    if (date != null && mounted) {
       setState(() {
         if (first) {
           from = date;
@@ -85,6 +86,7 @@ class _StatementsPageState extends State<StatementsPage>
           to = date;
         }
       });
+    }
   }
 
   Future<void> create() async {
@@ -101,9 +103,10 @@ class _StatementsPageState extends State<StatementsPage>
         'format': format
       });
       await load();
-      if (mounted)
+      if (mounted) {
         showSuccess(context,
             'Выписка в очереди. Обычно подготовка занимает до минуты.');
+      }
     } catch (e) {
       if (mounted) showError(context, e);
     } finally {
@@ -132,9 +135,10 @@ class _StatementsPageState extends State<StatementsPage>
   @override
   Widget build(BuildContext context) {
     final s = context.watch<BankStore>();
-    if (s.accounts.isEmpty)
+    if (s.accounts.isEmpty) {
       return const EmptyState(
           'Нет счетов для выписки', 'Сначала откройте учебный счёт.');
+    }
     // Accounts can arrive after the initial company refresh.
     if (account == null) {
       account = s.accounts.first.id;

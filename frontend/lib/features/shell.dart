@@ -208,9 +208,10 @@ class _BankShellState extends State<BankShell> with WidgetsBindingObserver {
                                     onChanged: s.mutating
                                         ? null
                                         : (id) {
-                                            if (id != null)
+                                            if (id != null) {
                                               s.select(s.companies.firstWhere(
                                                   (c) => c.id == id));
+                                            }
                                           }))),
                     const SizedBox(width: 14),
                     IconButton(
@@ -257,12 +258,14 @@ class _BankShellState extends State<BankShell> with WidgetsBindingObserver {
                                   : () async {
                                       try {
                                         await s.retryPending();
-                                        if (context.mounted)
+                                        if (context.mounted) {
                                           showSuccess(context,
                                               'Результат запроса получен');
+                                        }
                                       } catch (e) {
-                                        if (context.mounted)
+                                        if (context.mounted) {
                                           showError(context, e);
+                                        }
                                       }
                                     },
                               child: Text(s.mutating

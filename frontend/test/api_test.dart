@@ -9,9 +9,10 @@ void main() {
       () async {
     var refreshes = 0;
     final client = MockClient((request) async {
-      if (request.url.path.endsWith('auth/login/'))
+      if (request.url.path.endsWith('auth/login/')) {
         return http.Response(
             jsonEncode({'access': 'old', 'refresh': 'r1'}), 200);
+      }
       if (request.url.path.endsWith('auth/refresh/')) {
         refreshes++;
         expect(jsonDecode(request.body)['refresh'], 'r1');
@@ -33,10 +34,12 @@ void main() {
   test('Mutation key and exact body survive 401 token renewal', () async {
     final requests = <http.Request>[];
     final api = BankApi(client: MockClient((request) async {
-      if (request.url.path.endsWith('auth/login/'))
+      if (request.url.path.endsWith('auth/login/')) {
         return http.Response('{"access":"a","refresh":"r"}', 200);
-      if (request.url.path.endsWith('auth/refresh/'))
+      }
+      if (request.url.path.endsWith('auth/refresh/')) {
         return http.Response('{"access":"b","refresh":"s"}', 200);
+      }
       requests.add(request);
       return http.Response('{}', requests.length == 1 ? 401 : 200);
     }));

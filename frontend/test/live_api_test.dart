@@ -4,11 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:business_bank/core/api.dart';
 import 'package:business_bank/core/models.dart';
 
-class RealNetwork extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) =>
-      super.createHttpClient(context);
-}
+class RealNetwork extends HttpOverrides {}
 
 void main() {
   test('Live Django payment lifecycle and exact idempotent approval', () async {

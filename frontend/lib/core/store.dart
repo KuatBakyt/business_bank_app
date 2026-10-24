@@ -85,7 +85,7 @@ class BankStore extends ChangeNotifier {
     error = null;
     _notify();
     try {
-      if (register)
+      if (register) {
         await api.request('POST', 'auth/register/',
             authenticated: false,
             body: {
@@ -93,6 +93,7 @@ class BankStore extends ChangeNotifier {
               'password': password,
               'first_name': name.trim()
             });
+      }
       await api.login(email, password);
       final me = await api.request('GET', 'auth/me/') as Json;
       final list = (await api.all('companies/')).map(Company.fromJson).toList();
@@ -163,8 +164,9 @@ class BankStore extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    if (pending != null)
+    if (pending != null) {
       throw const ApiFailure('Сначала проверьте результат ожидающего запроса');
+    }
     busy = true;
     _notify();
     try {
@@ -184,8 +186,9 @@ class BankStore extends ChangeNotifier {
 
   Future<Json> command(String path, Json body,
       {String method = 'POST', String label = 'Платёж'}) async {
-    if (pending != null)
+    if (pending != null) {
       throw const ApiFailure('Сначала проверьте предыдущий запрос');
+    }
     if (mutating) throw const ApiFailure('Запрос уже выполняется');
     pending = PendingCommand(
         path: path,
@@ -200,16 +203,18 @@ class BankStore extends ChangeNotifier {
 
   Future<Json> retryPending() async {
     final current = pending;
-    if (current == null || mutating)
+    if (current == null || mutating) {
       throw const ApiFailure('Нет доступного запроса');
+    }
     mutating = true;
     _notify();
     final identity = userId;
     try {
       final result = await api.request(current.method, current.path,
           body: current.body, key: current.key) as Json;
-      if (userId != identity)
+      if (userId != identity) {
         throw const ApiFailure('Войдите снова для проверки результата');
+      }
       pending = null;
       platform.savePending(identity, null);
       await refresh();

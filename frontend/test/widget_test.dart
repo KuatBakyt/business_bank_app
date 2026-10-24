@@ -76,8 +76,17 @@ BankStore fixture({String role = 'OWNER'}) {
 Future<void> loadFonts() async {
   final file = File('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf');
   if (file.existsSync()) {
-    final loader = FontLoader('Roboto')
+    final loader = FontLoader('BankSans')
       ..addFont(Future.value(ByteData.sublistView(file.readAsBytesSync())));
+    await loader.load();
+  }
+  final sdk = Platform.environment['FLUTTER_ROOT'];
+  final icons = File('$sdk/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
+  if (icons.existsSync()) {
+    final loader = FontLoader('MaterialIcons')..addFont(Future.value(ByteData.sublistView(icons.readAsBytesSync())));
+    await loader.load();
+  } else {
+    final loader = FontLoader('MaterialIcons')..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
     await loader.load();
   }
 }
@@ -131,14 +140,20 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Новый платёж'));
     await tester.pumpAndSettle();
+    if (const bool.fromEnvironment('CAPTURE_UI')) {
+      await tester.enterText(find.byType(TextFormField).at(0), 'DEMO-VECTOR-001');
+      await tester.enterText(find.byType(TextFormField).at(1), '150000');
+      await tester.enterText(find.byType(TextFormField).at(2), 'Оплата услуг');
+      await tester.pumpAndSettle();
+      await expectLater(find.byType(MaterialApp), matchesGoldenFile('screenshots/payment-form.png'));
+      for (var i = 0; i < 3; i++) { await tester.enterText(find.byType(TextFormField).at(i), ''); }
+    }
     await tester.tap(find.text('На согласование'));
     await tester.pumpAndSettle();
     expect(find.text('Введите номер счёта'), findsOneWidget);
     expect(s.pending, isNull);
     expect(tester.takeException(), isNull);
-    if (const bool.fromEnvironment('CAPTURE_UI'))
-      await expectLater(find.byType(MaterialApp),
-          matchesGoldenFile('screenshots/payment-form.png'));
+
     await tester.pumpWidget(const SizedBox());
     s.dispose();
   });
@@ -158,9 +173,10 @@ void main() {
     expect(find.text('Одобрить'), findsOneWidget);
     expect(find.text('Отклонить'), findsOneWidget);
     expect(tester.takeException(), isNull);
-    if (const bool.fromEnvironment('CAPTURE_UI'))
+    if (const bool.fromEnvironment('CAPTURE_UI')) {
       await expectLater(find.byType(MaterialApp),
           matchesGoldenFile('screenshots/payment-approval.png'));
+    }
     expect(element.mounted, true);
     await tester.pumpWidget(const SizedBox());
     s.dispose();

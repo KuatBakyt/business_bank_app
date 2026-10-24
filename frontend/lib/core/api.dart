@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'models.dart';
@@ -54,8 +53,9 @@ class BankApi {
     final data = await request('POST', 'auth/login/',
         body: {'email': email.trim(), 'password': password},
         authenticated: false) as Json;
-    if (generation != _generation || _closed)
+    if (generation != _generation || _closed) {
       throw const ApiFailure('Сессия изменена');
+    }
     _access = data['access'] as String;
     _refresh = data['refresh'] as String;
   }
@@ -63,8 +63,9 @@ class BankApi {
   Future<void> logout() async {
     final refresh = _refresh;
     try {
-      if (refresh != null)
+      if (refresh != null) {
         await request('POST', 'auth/logout/', body: {'refresh': refresh});
+      }
     } finally {
       clear();
     }
@@ -78,8 +79,9 @@ class BankApi {
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({'refresh': token}))
         .timeout(const Duration(seconds: 25));
-    if (_closed || generation != _generation)
+    if (_closed || generation != _generation) {
       throw const ApiFailure('Сессия изменена');
+    }
     if (response.statusCode != 200) {
       clear();
       onExpired?.call();
@@ -102,8 +104,9 @@ class BankApi {
       final uri = base
           .resolve(path)
           .replace(queryParameters: query?.map((k, v) => MapEntry(k, '$v')));
-      if (uri.origin != base.origin || !uri.path.startsWith(base.path))
+      if (uri.origin != base.origin || !uri.path.startsWith(base.path)) {
         throw ArgumentError('Invalid API path');
+      }
       final req = http.Request(method, uri);
       req.headers['Accept'] =
           binary ? 'application/octet-stream' : 'application/json';
@@ -111,8 +114,9 @@ class BankApi {
         req.headers['Content-Type'] = 'application/json';
         req.body = jsonEncode(body);
       }
-      if (authenticated && _access != null)
+      if (authenticated && _access != null) {
         req.headers['Authorization'] = 'Bearer $_access';
+      }
       if (key != null) req.headers['Idempotency-Key'] = key;
       return client
           .send(req)
@@ -122,8 +126,9 @@ class BankApi {
 
     try {
       var response = await send();
-      if (authenticated && generation != _generation)
+      if (authenticated && generation != _generation) {
         throw const ApiFailure('Сессия изменена');
+      }
       if (response.statusCode == 401 && authenticated) {
         if (originalToken == _access) {
           final existing = _refreshing;
@@ -139,12 +144,14 @@ class BankApi {
             }
           }
         }
-        if (generation != _generation)
+        if (generation != _generation) {
           throw const ApiFailure('Войдите снова', status: 401);
+        }
         response = await send();
       }
-      if (generation != _generation || _closed)
+      if (generation != _generation || _closed) {
         throw const ApiFailure('Сессия изменена');
+      }
       if (response.statusCode >= 200 && response.statusCode < 300) {
         if (binary) return Uint8List.fromList(response.bodyBytes);
         return response.bodyBytes.isEmpty

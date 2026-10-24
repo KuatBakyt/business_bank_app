@@ -85,6 +85,7 @@ class Payment {
 
 const statuses = <String, String>{
   'DRAFT': 'Черновик',
+  'NOT_EXECUTED': 'Не исполнен',
   'PENDING_APPROVAL': 'На согласовании',
   'EXECUTED': 'Исполнен',
   'REJECTED': 'Отклонён',
