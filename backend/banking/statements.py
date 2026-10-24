@@ -31,7 +31,9 @@ def safe_csv(value):
 
 @transaction.atomic
 def snapshot(export):
-    account = Account.objects.select_for_update().select_related("company").get(pk=export.account_id)
+    account = (
+        Account.objects.select_for_update(of=("self",)).select_related("company").get(pk=export.account_id)
+    )
     lo, hi = boundaries(export.date_from, export.date_to)
     entries = (
         LedgerEntry.objects.filter(account=account)

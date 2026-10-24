@@ -1,4 +1,6 @@
 from decimal import Decimal
+from collections.abc import Mapping
+from datetime import date
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -8,6 +10,8 @@ from .models import Account, AuditEvent, Company, LedgerEntry, Membership, Payme
 
 class StrictSerializer(serializers.Serializer):
     def to_internal_value(self, data):
+        if not isinstance(data, Mapping):
+            raise serializers.ValidationError("Ожидается JSON объект")
         unknown = set(data) - set(self.fields)
         if unknown:
             raise serializers.ValidationError({key: "Неизвестное поле" for key in unknown})
@@ -155,7 +159,11 @@ class StatementInput(StrictSerializer):
     format = serializers.ChoiceField(choices=["csv", "pdf"])
 
     def validate(self, data):
-        if data["date_to"] < data["date_from"] or (data["date_to"] - data["date_from"]).days >= 366:
+        if (
+            data["date_to"] == date.max
+            or data["date_to"] < data["date_from"]
+            or (data["date_to"] - data["date_from"]).days >= 366
+        ):
             raise serializers.ValidationError("Период от 1 до 366 дней")
         return data
 

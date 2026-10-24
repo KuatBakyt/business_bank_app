@@ -20,6 +20,7 @@ def private_storage(settings, tmp_path):
 
 
 def test_t10_demo_funding_idempotent(data):
+    data["source"].refresh_from_db()
     before = data["source"].cached_balance
     fund_demo(data["source"].pk, Decimal("100"), "fund-source", data["owner"])
     data["source"].refresh_from_db()
