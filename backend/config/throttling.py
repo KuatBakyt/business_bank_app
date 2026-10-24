@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 import hashlib
 from django.core.cache import cache
 from rest_framework.throttling import BaseThrottle
