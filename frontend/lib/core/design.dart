@@ -17,9 +17,12 @@ ThemeData bankTheme() => ThemeData(
           primary: teal,
           secondary: navy,
           surface: Colors.white),
-      dialogTheme: DialogThemeData(backgroundColor: Colors.white, surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-    textTheme: const TextTheme(
+      dialogTheme: DialogThemeData(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+      textTheme: const TextTheme(
         headlineLarge: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.w800,

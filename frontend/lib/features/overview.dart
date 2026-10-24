@@ -20,7 +20,8 @@ class OverviewPage extends StatelessWidget {
                   label: const Text('Новый платёж'))
               : null),
       LayoutBuilder(builder: (_, c) {
-        final width = c.maxWidth < 600 ? (c.maxWidth - 16) / 2 : (c.maxWidth - 32) / 3;
+        final width =
+            c.maxWidth < 600 ? (c.maxWidth - 16) / 2 : (c.maxWidth - 32) / 3;
         return Wrap(spacing: 16, runSpacing: 16, children: [
           Metric(
               'Общий баланс',
@@ -31,7 +32,7 @@ class OverviewPage extends StatelessWidget {
           Metric('Счета', '${s.accounts.length}', Icons.description_outlined,
               const Color(0xFFEEF5FE), width),
           Metric(
-              'На согласовании',
+              c.maxWidth < 600 ? 'Ожидают' : 'На согласовании',
               '${s.payments.where((p) => p.status == 'PENDING_APPROVAL').length}',
               Icons.schedule,
               const Color(0xFFFFF8E9),

@@ -533,8 +533,9 @@ class _PaymentDetailState extends State<PaymentDetail> {
                     const Icon(Icons.arrow_right, color: muted),
                     const StatusPill('PENDING_APPROVAL'),
                     const Icon(Icons.arrow_right, color: muted),
-                    StatusPill(
-                        p.status == 'DRAFT' || pending ? 'NOT_EXECUTED' : p.status)
+                    StatusPill(p.status == 'DRAFT' || pending
+                        ? 'NOT_EXECUTED'
+                        : p.status)
                   ]),
                   if (pending)
                     const Padding(

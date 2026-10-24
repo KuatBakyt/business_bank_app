@@ -81,12 +81,15 @@ Future<void> loadFonts() async {
     await loader.load();
   }
   final sdk = Platform.environment['FLUTTER_ROOT'];
-  final icons = File('$sdk/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
+  final icons =
+      File('$sdk/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf');
   if (icons.existsSync()) {
-    final loader = FontLoader('MaterialIcons')..addFont(Future.value(ByteData.sublistView(icons.readAsBytesSync())));
+    final loader = FontLoader('MaterialIcons')
+      ..addFont(Future.value(ByteData.sublistView(icons.readAsBytesSync())));
     await loader.load();
   } else {
-    final loader = FontLoader('MaterialIcons')..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
+    final loader = FontLoader('MaterialIcons')
+      ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
     await loader.load();
   }
 }
@@ -141,12 +144,16 @@ void main() {
     await tester.tap(find.text('Новый платёж'));
     await tester.pumpAndSettle();
     if (const bool.fromEnvironment('CAPTURE_UI')) {
-      await tester.enterText(find.byType(TextFormField).at(0), 'DEMO-VECTOR-001');
+      await tester.enterText(
+          find.byType(TextFormField).at(0), 'DEMO-VECTOR-001');
       await tester.enterText(find.byType(TextFormField).at(1), '150000');
       await tester.enterText(find.byType(TextFormField).at(2), 'Оплата услуг');
       await tester.pumpAndSettle();
-      await expectLater(find.byType(MaterialApp), matchesGoldenFile('screenshots/payment-form.png'));
-      for (var i = 0; i < 3; i++) { await tester.enterText(find.byType(TextFormField).at(i), ''); }
+      await expectLater(find.byType(MaterialApp),
+          matchesGoldenFile('screenshots/payment-form.png'));
+      for (var i = 0; i < 3; i++) {
+        await tester.enterText(find.byType(TextFormField).at(i), '');
+      }
     }
     await tester.tap(find.text('На согласование'));
     await tester.pumpAndSettle();

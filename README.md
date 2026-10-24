@@ -1,6 +1,7 @@
 # Business Bank API
 
 [![Backend checks](https://github.com/KuatBakyt/business_bank_app/actions/workflows/backend.yml/badge.svg)](https://github.com/KuatBakyt/business_bank_app/actions/workflows/backend.yml)
+[![Flutter client](https://github.com/KuatBakyt/business_bank_app/actions/workflows/flutter.yml/badge.svg)](https://github.com/KuatBakyt/business_bank_app/actions/workflows/flutter.yml)
 
 Учебный банковский кабинет для ИП и малого бизнеса. Только тестовые средства и вымышленные данные. В репозитории находятся Django backend и подключённый Flutter Web интерфейс.
 
