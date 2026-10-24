@@ -135,7 +135,9 @@ class PaymentList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         services.membership(self.request.user, self.kwargs["company_id"])
-        qs = Payment.objects.filter(source__company_id=self.kwargs["company_id"])
+        qs = Payment.objects.filter(source__company_id=self.kwargs["company_id"]).select_related(
+            "source", "destination__company"
+        )
         filters = PaymentFilters(data=self.request.query_params)
         filters.is_valid(raise_exception=True)
         filters = filters.validated_data
@@ -268,7 +270,15 @@ class AuditList(generics.ListAPIView):
         return AuditEvent.objects.filter(company_id=self.kwargs["company_id"]).order_by("-created_at", "-id")
 
 
-class StatementCreate(APIView):
+class StatementCreate(generics.ListCreateAPIView):
+    serializer_class = StatementSerializer
+
+    def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return StatementExport.objects.none()
+        account = services.accessible_account(self.request.user, self.kwargs["account_id"])
+        return StatementExport.objects.filter(account=account).order_by("-created_at", "-id")
+
     @extend_schema(request=StatementInput, responses={202: StatementSerializer})
     def post(self, request, account_id):
         account = services.accessible_account(request.user, account_id)

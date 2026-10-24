@@ -39,7 +39,9 @@ def accessible_account(user, account_id):
 
 
 def accessible_payment(user, payment_id):
-    payment = get_object_or_404(Payment.objects.select_related("source", "destination"), pk=payment_id)
+    payment = get_object_or_404(
+        Payment.objects.select_related("source", "destination__company"), pk=payment_id
+    )
     membership(user, payment.source.company_id)
     return payment
 
@@ -131,6 +133,9 @@ def payment_data(payment):
         "id": str(payment.id),
         "source": str(payment.source_id),
         "destination": str(payment.destination_id),
+        "source_number": payment.source.number,
+        "destination_number": payment.destination.number,
+        "destination_name": payment.destination.company.name,
         "amount": str(payment.amount),
         "purpose": payment.purpose,
         "status": payment.status,

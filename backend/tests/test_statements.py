@@ -121,3 +121,17 @@ def test_statement_api_validates_period(data):
         ).status_code
         == 202
     )
+
+
+def test_statement_history_is_scoped_to_company(data):
+    today = dj_timezone.now().date()
+    export = StatementExport.objects.create(
+        account=data["source"], requested_by=data["owner"], date_from=today, date_to=today, format="csv"
+    )
+    url = f"/api/v1/accounts/{data['source'].pk}/statement-exports/"
+    response = data["client"].get(url)
+    assert response.status_code == 200
+    assert response.data["count"] == 1
+    assert response.data["results"][0]["id"] == str(export.pk)
+    data["client"].force_authenticate(data["other"])
+    assert data["client"].get(url).status_code == 404

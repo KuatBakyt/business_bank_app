@@ -99,12 +99,19 @@ class PaymentInput(StrictSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
+    source_number = serializers.CharField(source="source.number", read_only=True)
+    destination_number = serializers.CharField(source="destination.number", read_only=True)
+    destination_name = serializers.CharField(source="destination.company.name", read_only=True)
+
     class Meta:
         model = Payment
         fields = [
             "id",
             "source",
             "destination",
+            "source_number",
+            "destination_number",
+            "destination_name",
             "amount",
             "purpose",
             "status",
