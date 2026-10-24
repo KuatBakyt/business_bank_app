@@ -1,0 +1,50 @@
+name: Backend checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: bank
+          POSTGRES_PASSWORD: test-only-password
+          POSTGRES_DB: bank
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd 'pg_isready -U bank -d bank'
+          --health-interval 5s --health-timeout 5s --health-retries 15
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd 'redis-cli ping'
+          --health-interval 5s --health-timeout 3s --health-retries 15
+    env:
+      DJANGO_SECRET_KEY: ci-only-secret-do-not-use-in-production-abcdefghijklmnopqrstuvwxyz
+      DATABASE_URL: postgresql://bank:test-only-password@localhost:5432/bank
+      REDIS_URL: redis://localhost:6379/0
+      DEMO_PASSWORD: Seed-only-ci-password-827!
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: ruff check . && ruff format --check .
+      - run: python backend/manage.py check
+      - run: python backend/manage.py migrate --noinput
+      - run: python backend/manage.py makemigrations --check --dry-run
+      - run: python backend/manage.py spectacular --file /tmp/schema.yaml --validate --fail-on-warn
+      - run: pytest
+      - run: python backend/manage.py seed_demo && python backend/manage.py seed_demo && python backend/manage.py reconcile
+      - name: Build and smoke test image
+        run: |
+          docker build -t business-bank-ci .
+          docker run -d --name bank-api --network host -e DATABASE_URL -e REDIS_URL -e DJANGO_SECRET_KEY -e ALLOWED_HOSTS=localhost,127.0.0.1 business-bank-ci
+          curl --fail --retry 15 --retry-connrefused --retry-delay 1 http://localhost:8000/health/ready/
+          curl --fail http://localhost:8000/api/schema/ > /dev/null
+          docker stop bank-api
