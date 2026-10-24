@@ -19,6 +19,22 @@ Python 3.12 · Django REST Framework · PostgreSQL 16 · JWT · Celery · Redis 
 - Аудит, Swagger, seed_demo, reconcile, CI с настоящей PostgreSQL.
 - Адаптивный Flutter Web кабинет: счета, платежи, согласование, выписки, сотрудники и аудит.
 
+## Внешний вид
+
+Снимки настоящих Flutter-экранов с вымышленными тестовыми данными.
+
+![Обзор Business Bank](frontend/docs/screenshots/dashboard-desktop.png)
+
+<details>
+<summary>Мобильная версия и платежи</summary>
+
+<img src="frontend/docs/screenshots/dashboard-mobile.png" alt="Мобильный обзор" width="260">
+
+![Новый платёж](frontend/docs/screenshots/payment-form.png)
+![Согласование платежа](frontend/docs/screenshots/payment-approval.png)
+
+</details>
+
 ## Запуск на Windows
 
 Нужны Git и Docker Desktop. В PowerShell:
