@@ -5,11 +5,33 @@ permissions:
 jobs:
   flutter:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: bank
+          POSTGRES_PASSWORD: integration-only
+          POSTGRES_DB: bank_frontend
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U bank -d bank_frontend"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+    env:
+      DJANGO_SECRET_KEY: integration-only-secret-abcdefghijklmnopqrstuvwxyz-1234567890
+      DATABASE_URL: postgresql://bank:integration-only@localhost:5432/bank_frontend
+      REDIS_URL: redis://localhost:6379/0
+      DEMO_PASSWORD: Flutter-integration-only-827!
     defaults:
       run:
         working-directory: frontend
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.47.6'
@@ -19,6 +41,16 @@ jobs:
       - run: dart format lib test
       - run: flutter analyze --no-fatal-infos
       - run: flutter test
+      - run: flutter test --update-goldens --dart-define=CAPTURE_UI=true test/widget_test.dart
+      - name: Start Django for live integration
+        run: |
+          pip install -r ../requirements.txt
+          python ../backend/manage.py migrate --noinput
+          python ../backend/manage.py seed_demo
+          python ../backend/manage.py runserver 127.0.0.1:8000 --noreload > /tmp/bank-api.log 2>&1 &
+          curl --fail --retry 20 --retry-connrefused --retry-delay 1 http://localhost:8000/health/ready/
+      - run: flutter test --dart-define=LIVE_API=true --dart-define=LIVE_PASSWORD=Flutter-integration-only-827! test/live_api_test.dart
+      - run: python ../backend/manage.py reconcile
       - run: flutter build web --release --no-web-resources-cdn
       - uses: actions/upload-artifact@v4
         if: always()
@@ -27,5 +59,7 @@ jobs:
           path: |
             frontend/build/web
             frontend/pubspec.lock
+            frontend/lib
+            frontend/test
             frontend/test/screenshots
           retention-days: 7

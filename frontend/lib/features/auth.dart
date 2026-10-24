@@ -51,7 +51,7 @@ class _AuthScreenState extends State<AuthScreen> {
             child: s.busy ? const SizedBox(width: 19, height: 19, child: CircularProgressIndicator(strokeWidth: 2)) : Text(register ? 'Зарегистрироваться' : 'Войти в кабинет'))),
           const SizedBox(height: 15), Center(child: TextButton(onPressed: s.busy ? null : () => setState(() => register = !register), child: Text(register ? 'Уже есть аккаунт? Войти' : 'Создать аккаунт'))),
           const SizedBox(height: 28), const Text('Тестовые средства. Реальные переводы не выполняются. После обновления страницы войдите снова.', style: TextStyle(color: muted, fontSize: 12, height: 1.5)),
-        ]))))),
+        ])))))),
     ])));
   }
 }
