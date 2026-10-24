@@ -182,3 +182,20 @@ class StatementSerializer(serializers.ModelSerializer):
             "created_at",
             "expires_at",
         ]
+
+
+class DateRangeInput(serializers.Serializer):
+    date_from = serializers.DateField(required=False)
+    date_to = serializers.DateField(required=False)
+
+    def validate(self, data):
+        if ("date_from" in data) != ("date_to" in data):
+            raise serializers.ValidationError("Укажите обе даты периода")
+        if "date_from" in data and (data["date_to"] == date.max or data["date_to"] < data["date_from"]):
+            raise serializers.ValidationError("Неверный период")
+        return data
+
+
+class PaymentFilters(DateRangeInput):
+    account = serializers.UUIDField(required=False)
+    status = serializers.ChoiceField(choices=Payment.Status.choices, required=False)

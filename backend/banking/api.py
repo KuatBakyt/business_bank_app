@@ -23,6 +23,8 @@ from .serializers import (
     MemberInput,
     MemberPatch,
     MemberSerializer,
+    PaymentFilters,
+    DateRangeInput,
     PaymentInput,
     PaymentSerializer,
     ReasonInput,
@@ -134,12 +136,23 @@ class PaymentList(generics.ListCreateAPIView):
     def get_queryset(self):
         services.membership(self.request.user, self.kwargs["company_id"])
         qs = Payment.objects.filter(source__company_id=self.kwargs["company_id"])
-        state = self.request.query_params.get("status")
-        if state:
-            if state not in Payment.Status.values:
-                raise ValidationError({"status": "Неизвестный статус"})
-            qs = qs.filter(status=state)
+        filters = PaymentFilters(data=self.request.query_params)
+        filters.is_valid(raise_exception=True)
+        filters = filters.validated_data
+        if "status" in filters:
+            qs = qs.filter(status=filters["status"])
+        if "account" in filters:
+            qs = qs.filter(source_id=filters["account"])
+        if "date_from" in filters:
+            from .statements import boundaries
+
+            lo, hi = boundaries(filters["date_from"], filters["date_to"])
+            qs = qs.filter(created_at__gte=lo, created_at__lt=hi)
         return qs.order_by("-created_at", "-id")
+
+    @extend_schema(parameters=[PaymentFilters])
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
     @extend_schema(request=PaymentInput, responses={201: PaymentSerializer}, parameters=[IDEMPOTENCY])
     def post(self, request, company_id):
@@ -237,18 +250,12 @@ class EntryList(generics.ListAPIView):
             .select_related("journal__payment")
             .order_by("-journal__posted_at", "-id")
         )
-        if "date_from" in self.request.query_params or "date_to" in self.request.query_params:
+        filters = DateRangeInput(data=self.request.query_params)
+        filters.is_valid(raise_exception=True)
+        if "date_from" in filters.validated_data:
             from .statements import boundaries
-            from datetime import date
 
-            try:
-                start = date.fromisoformat(self.request.query_params["date_from"])
-                end = date.fromisoformat(self.request.query_params["date_to"])
-            except (KeyError, ValueError):
-                raise ValidationError("Нужны date_from и date_to в формате YYYY-MM-DD") from None
-            if end < start:
-                raise ValidationError("Неверный период")
-            lo, hi = boundaries(start, end)
+            lo, hi = boundaries(filters.validated_data["date_from"], filters.validated_data["date_to"])
             qs = qs.filter(journal__posted_at__gte=lo, journal__posted_at__lt=hi)
         return qs
 
