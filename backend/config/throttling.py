@@ -33,9 +33,8 @@ class LoginThrottle(FixedWindow):
     scope = "login"
 
     def keys(self, request):
-        return super().keys(request) + [
-            f"{self.scope}:email:{str(request.data.get('email', '')).strip().lower()}"
-        ]
+        email = request.data.get("email", "") if isinstance(request.data, Mapping) else ""
+        return super().keys(request) + [f"{self.scope}:email:{str(email).strip().lower()}"]
 
 
 class RecipientThrottle(FixedWindow):
